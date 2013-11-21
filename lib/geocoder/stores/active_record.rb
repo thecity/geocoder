@@ -132,13 +132,15 @@ module Geocoder::Store
         else
           conditions = [bounding_box_conditions + " AND #{distance} <= ?", radius]
         end
+        conditions = add_exclude_condition(conditions, options[:exclude])
+        conditions = merge_conditions(conditions, options[:conditions]) if options[:conditions].present?
         {
           :select => select_clause(options[:select],
                                    select_distance ? distance : nil,
                                    select_bearing ? bearing : nil,
                                    distance_column,
                                    bearing_column),
-          :conditions => add_exclude_condition(conditions, options[:exclude]),
+          :conditions => conditions,
           :order => options.include?(:order) ? options[:order] : "#{distance_column} ASC"
         }
       end
