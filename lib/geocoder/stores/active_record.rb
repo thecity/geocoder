@@ -39,13 +39,12 @@ module Geocoder::Store
           latitude, longitude = Geocoder::Calculations.extract_coordinates(location)
           if Geocoder::Calculations.coordinates_present?(latitude, longitude)
             options = near_scope_options(latitude, longitude, *args)
-            select(options[:select]).where(options[:conditions]).
-              order(options[:order])
+            {:select => options[:select], :conditions => options[:conditions], :order => options[:order]}
           else
             # If no lat/lon given we don't want any results, but we still
             # need distance and bearing columns so you can add, for example:
             # .order("distance")
-            select(select_clause(nil, "NULL", "NULL")).where(false_condition)
+            {:select => select_clause(nil, "NULL", "NULL"), :conditions => (false_condition)}
           end
         }
 
@@ -58,13 +57,13 @@ module Geocoder::Store
         named_scope :within_bounding_box, lambda{ |bounds|
           sw_lat, sw_lng, ne_lat, ne_lng = bounds.flatten if bounds
           if sw_lat && sw_lng && ne_lat && ne_lng
-            where(Geocoder::Sql.within_bounding_box(
+            {:conditions => Geocoder::Sql.within_bounding_box(
               sw_lat, sw_lng, ne_lat, ne_lng,
               full_column_name(geocoder_options[:latitude]),
               full_column_name(geocoder_options[:longitude])
-            ))
+            )}
           else
-            select(select_clause(nil, "NULL", "NULL")).where(false_condition)
+            {:select => select_clause(nil, "NULL", "NULL"), :conditions => false_condition}
           end
         }
       end
@@ -82,7 +81,7 @@ module Geocoder::Store
         end
       end
 
-      private # ----------------------------------------------------------------
+      # private # ----------------------------------------------------------------
 
       ##
       # Get options hash suitable for passing to ActiveRecord.find to get
