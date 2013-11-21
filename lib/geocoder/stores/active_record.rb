@@ -39,7 +39,7 @@ module Geocoder::Store
           latitude, longitude = Geocoder::Calculations.extract_coordinates(location)
           if Geocoder::Calculations.coordinates_present?(latitude, longitude)
             options = near_scope_options(latitude, longitude, *args)
-            {:select => options[:select], :conditions => options[:conditions], :order => options[:order]}
+            {:select => options[:select], :conditions => options[:conditions], :joins => options[:joins] , :group => options[:group], :order => options[:order], :limit => options[:limit], :include =>options[:include]}
           else
             # If no lat/lon given we don't want any results, but we still
             # need distance and bearing columns so you can add, for example:
@@ -141,7 +141,11 @@ module Geocoder::Store
                                    distance_column,
                                    bearing_column),
           :conditions => conditions,
-          :order => options.include?(:order) ? options[:order] : "#{distance_column} ASC"
+          :order => options.include?(:order) ? options[:order] : "#{distance_column} ASC",
+          :group => options[:group],
+          :joins => options[:joins],
+          :limit => options[:limit],
+          :include => options[:include]
         }
       end
 
