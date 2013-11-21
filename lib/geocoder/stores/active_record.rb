@@ -17,13 +17,13 @@ module Geocoder::Store
       base.class_eval do
 
         # scope: geocoded objects
-        scope :geocoded, lambda {
+        named_scope :geocoded, lambda {
           where("#{geocoder_options[:latitude]} IS NOT NULL " +
             "AND #{geocoder_options[:longitude]} IS NOT NULL")
         }
 
         # scope: not-geocoded objects
-        scope :not_geocoded, lambda {
+        named_scope :not_geocoded, lambda {
           where("#{geocoder_options[:latitude]} IS NULL " +
             "OR #{geocoder_options[:longitude]} IS NULL")
         }
@@ -35,7 +35,7 @@ module Geocoder::Store
         # (see Geocoder::Store::ActiveRecord::ClassMethods.near_scope_options
         # for details).
         #
-        scope :near, lambda{ |location, *args|
+        named_scope :near, lambda{ |location, *args|
           latitude, longitude = Geocoder::Calculations.extract_coordinates(location)
           if Geocoder::Calculations.coordinates_present?(latitude, longitude)
             options = near_scope_options(latitude, longitude, *args)
@@ -55,7 +55,7 @@ module Geocoder::Store
         # corner followed by the northeast corner of the box
         # (<tt>[[sw_lat, sw_lon], [ne_lat, ne_lon]]</tt>).
         #
-        scope :within_bounding_box, lambda{ |bounds|
+        named_scope :within_bounding_box, lambda{ |bounds|
           sw_lat, sw_lng, ne_lat, ne_lng = bounds.flatten if bounds
           if sw_lat && sw_lng && ne_lat && ne_lng
             where(Geocoder::Sql.within_bounding_box(
